@@ -3,12 +3,12 @@
  * @
  */
 
-$serachTerm = "lebron james"; // original search term.
-$keywords = explode ( ' ', $searchTerm );
-$query;
+$searchTerm = "lebron james"; // original search term.
+$keywords = explode (' ',$searchTerm);
+$query='';
 for($i = 0; $i < count ( $keywords ); $i ++) {
-	if ($keywords [i] != '') {
-		$query .= $keyword [i] . '%20'; // build a query
+	if ($keywords [$i] != '') {
+		$query.= $keywords[$i] . '%20'; // build a query
 	}
 }
 $finalQuery = rtrim ( $query, '%20' ); // remove the last %20 from the above query
@@ -29,43 +29,40 @@ $list = array ();
 /*
  * @ store the decoded data into a new array
  */
-foreach ( $results ['results'] as $result ) {
+foreach ( $results ['results'] as $result ) 
+{
 	
-	$list [] = array (
+	$list[] = array (
 			'user' => $result ['from_user'],
 			'text' => $result ['text'],
-			'date' => $result ['created_at'] 
-	);
+			'date' => date("l M j \- g:ia",strtotime($result ['created_at']))
+					);
+	
 }
 
-$m = new Mongo ( 'localhost' ); // instantiate a new mongo object
-$db = $m->selectDB ( 'tweets' ); // select a database, the new database is created
-                              // on the fly
-$collection = new MongoCollection ( $db, 'tweets_collection' ); // build a new
-                                                            // connection
-$collection->insert ( $list ); // insert the data into the connection.
 
-/*
- * @ retrive data from the database.
- */
-$m = new Mongo ( localhost );
-$db = $m->selectDB ( 'tweets' );
-$criteria = $cursor = $db->selectCollection ( 'tweets_collection' )->find ();
+$m = new Mongo (); // instantiate a new mongo object
+$db = $m->selectDB ('tweets');
+$db->createCollection('tweets_collection'); // select a database, the new database is created
+                              // on the fly
+
+$cursor = $db->tweets_collection->find();
+
 $cursor->sort ( array (
 		'date' => 1 
 ) );
-$cursor->limit ( 20 );
+
+$cursor->limit(20)->batchSize(20);
+$result = $cursor->getNext();
+
 echo '<h2>The 20 tweets for search term:' . $searchTerm . 'is as following</h2><br>';
 echo '<hr><table>';
-echo '<tr><th>' . $obj ['user'] . '</th><th>' . $obj ['text'] . '</th><th>' . $obj ['date'] . '</th></tr>';
-foreach ( $cursor as $obj ) {
-	echo '<td>' . $obj ['user'] . '</td><td>' . $obj ['text'] . '</td><td>' . $obj ['date'] . '</td>';
+echo '<tr><th>User</th><th>Text</th><th>Date</th></tr>';
+
+for($i=0;$i<20;$i++)
+{
+	echo '<tr><td>' . $result[$i]['user'] . '</td><td>' . $result[$i]['text'] . '</td><td>' . $result[$i]['date'] . '</td></tr>';
 }
 
 echo '</table>';
-
-
-
-
-
 
